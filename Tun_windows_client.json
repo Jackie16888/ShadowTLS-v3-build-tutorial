@@ -8,7 +8,7 @@
       {
         "tag": "google",
         "address": "tls://8.8.8.8",
-		    "address_resolver": "local",
+        "address_resolver": "local",
         "detour": "proxy"		
       },
       {
@@ -25,7 +25,7 @@
       {
         "geosite": "category-ads-all",
         "server": "block",
-		    "disable_cache": true
+        "disable_cache": true
       },
       {
         "outbound": "any",
@@ -35,7 +35,7 @@
         "geosite": "cn",
         "server": "local"
       }
-	],
+    ],
     "strategy": "ipv4_only"	
   }, 
   "inbounds": [
@@ -43,7 +43,7 @@
       "type": "tun",
       "tag": "tun-in",
       "inet4_address": "172.19.0.1/30",
-	    "inet6_address": "fdfe:dcba:9876::1/126",
+      "inet6_address": "fdfe:dcba:9876::1/126",
       "auto_route": true,
       "strict_route": false,
       "stack": "gvisor",
@@ -53,7 +53,7 @@
   "outbounds": [
     {
       "type": "shadowsocks",
-	    "tag": "proxy",
+      "tag": "proxy",
       "method": "2022-blake3-chacha20-poly1305",
       "password": "NZew3ZrmZjxullszmAKtfu+pZh0F1dxnIPcwlaStjyI=",  //shadowsocks节点密码
       "detour": "shadowtls-out"
@@ -106,6 +106,6 @@
         "outbound": "block"
       }
     ],
-	"auto_detect_interface": true
+    "auto_detect_interface": true
   }  
 }
