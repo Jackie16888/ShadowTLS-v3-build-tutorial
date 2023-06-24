@@ -8,7 +8,7 @@
       {
         "tag": "google",
         "address": "tls://8.8.8.8",
-		"address_resolver": "local",
+        "address_resolver": "local",
         "detour": "proxy"		
       },
       {
@@ -29,7 +29,7 @@
       {
         "geosite": "category-ads-all",
         "server": "block",
-		"disable_cache": true
+        "disable_cache": true
       },
       {
         "outbound": "any",
@@ -46,7 +46,7 @@
         ],
         "server": "remote"
       }
-	],
+    ],
     "fakeip": {
       "enabled": true,
       "inet4_range": "198.18.0.0/15",
@@ -59,7 +59,7 @@
       "type": "tun",
       "tag": "tun-in",
       "inet4_address": "172.19.0.1/30",
-	  "inet6_address": "fdfe:dcba:9876::1/126",
+      "inet6_address": "fdfe:dcba:9876::1/126",
       "auto_route": true,
       "strict_route": false,
       "stack": "gvisor",
@@ -69,7 +69,7 @@
   "outbounds": [
     {
       "type": "shadowsocks",
-	  "tag": "proxy",
+      "tag": "proxy",
       "method": "2022-blake3-chacha20-poly1305",
       "password": "XTVsAyFnREiRn5hgrjUAu8a9dSsicFKYIJM+K8+Iv8g=",  //shadowsocks节点密码
       "detour": "shadowtls-out"
@@ -78,7 +78,7 @@
       "type": "shadowtls",
       "tag": "shadowtls-out",
       "server": "00.00.00.00",   //你的VPS的IP
-      "server_port": 443,   //端口
+      "server_port": 443,   //shadowtls端口
       "version": 3,
       "password": "NZew3ZrmZjxullszmAKtfu+pZh0F1dxnIPcwlaStjyI=",   //shadowtls密码
       "tls": {
@@ -122,6 +122,6 @@
         "outbound": "block"
       }
     ],
-	"auto_detect_interface": true
+    "auto_detect_interface": true
   }  
 }
