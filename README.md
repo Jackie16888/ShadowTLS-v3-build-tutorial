@@ -1,19 +1,15 @@
 # [ShadowTLS v3](https://github.com/ihciah/shadow-tls/tree/master)
 - **Install dependencies**
 ```
-apt update && apt -y install wget libc6-dev build-essential zlib1g-dev libssl-dev libevent-dev mingw-w64
-```
-- **Install go**
-```
-wget -c https://go.dev/dl/go1.20.5.linux-amd64.tar.gz -O - | tar -xz -C /usr/local && echo 'export PATH=$PATH:/usr/local/go/bin' > /etc/profile && source /etc/profile && go version 
+apt update && apt -y install wget
 ```
 - **Install sing-box**
 ```
-go install -v -tags with_dhcp,with_wireguard,with_shadowsocksr,with_ech,with_utls,with_gvisor,with_clash_api,with_lwip,github.com/sagernet/sing-box/cmd/sing-box@latest
+wget -c https://github.com/SagerNet/sing-box/releases/download/v1.3-rc2/sing-box-1.3-rc2-linux-amd64.tar.gz -O - | tar -xz -C /usr/local/bin --strip-components=1 && chmod +x /usr/local/bin/sing-box
 ```
 - **Download sing-box.service and config.json**
 ```
-cp ~/go/bin/sing-box /usr/local/bin/ && wget -P /etc/systemd/system https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/sing-box.service && mkdir /usr/local/etc/sing-box && wget -P /usr/local/etc/sing-box https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/config.json
+wget -P /etc/systemd/system https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/sing-box.service && mkdir /usr/local/etc/sing-box && wget -P /usr/local/etc/sing-box https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/config.json
 ```
 - **Test if it works**
 ```
