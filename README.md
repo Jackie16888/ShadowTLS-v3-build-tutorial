@@ -1,30 +1,30 @@
-# **说明**
+# **Illustrate**
 脚本采用官方配置，只是把搭建步骤自动化，无安全隐患，放心使用。
-- **一键安装**
+- **Installation**
 ```
 apt install -y curl
 ```
 ```
 bash <(curl -L https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/Install.sh)
 ```
-- **卸载步骤**
+- **Uninstall**
 
-1.停止sing-box服务：
+1.stop sing-box service：
 ```
 systemctl stop sing-box
 ```
-2.禁用sing-box服务的开机自启服务：
+2.Disable the boot self-starting service of the sing-box service：
 ```
 systemctl disable sing-box
 ```
-3.删除sing-box的配置文件和开机自启服务文件：
+3.Delete the configuration file and self-start service file of sing-box：
 ```
 rm /etc/systemd/system/sing-box.service
 ```
 ```
 rm -rf /usr/local/etc/sing-box
 ```
-4.删除sing-box程序文件：
+4.Delete the sing-box program file：
 ```
 rm /usr/local/bin/sing-box
 ```
