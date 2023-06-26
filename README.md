@@ -14,18 +14,18 @@ bash <(curl -L https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tuto
 ```
 systemctl stop sing-box
 ```
-2.Disable the boot self-starting service of the sing-box service：
+- **Disable the boot self-starting service of the sing-box service**
 ```
 systemctl disable sing-box
 ```
-3.Delete the configuration file and self-start service file of sing-box：
+- **Delete the configuration file and self-start service file of sing-box**
 ```
 rm /etc/systemd/system/sing-box.service
 ```
 ```
 rm -rf /usr/local/etc/sing-box
 ```
-4.Delete the sing-box program file：
+- **Delete the sing-box program file**
 ```
 rm /usr/local/bin/sing-box
 ```
