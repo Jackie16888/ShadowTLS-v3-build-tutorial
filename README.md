@@ -1,5 +1,5 @@
 # **illustrate**
-脚本采用官方配置，只是把搭建步骤自动化，无安全隐患，放心使用。
+This script automatically downloads the sing-box program to the /usr/local/bin directory according to your vps architecture, automatically configures the systemd service for the sing-box, and automatically generates the configuration information of the shadowTLS node. This script is completely open source, and you can use it with confidence.
 - **Installation**
 ```
 apt install -y curl
