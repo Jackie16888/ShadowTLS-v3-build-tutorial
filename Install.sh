@@ -201,19 +201,6 @@ systemctl daemon-reload
 systemctl enable sing-box
 systemctl start sing-box
 
-# 检查 sing-box 的启动状态
-echo "检查 sing-box 的启动状态..."
-systemctl status sing-box | cat
-
-# 等待一段时间后自动继续执行
-echo "等待5秒后自动继续执行..."
-sleep 5
-
-# 重启 sing-box 
-echo "重启 sing-box 服务..."
-systemctl stop sing-box
-systemctl start sing-box
-
 # 显示配置信息
 echo "---------------------"
 echo "sing-box已成功安装和配置。"
