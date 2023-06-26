@@ -1,20 +1,26 @@
-# [ShadowTLS v3](https://github.com/ihciah/shadow-tls/tree/master)
-- **Install dependencies**
+# **说明**
+脚本采用官方配置，只是把搭建步骤自动化，无安全隐患，放心使用。
+- **一键安装**
 ```
-apt update && apt -y install wget
+bash <(curl -L https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/Install.sh)
 ```
-- **Install sing-box**
+- **卸载步骤**
+1.停止sing-box服务：
 ```
-wget -c https://github.com/SagerNet/sing-box/releases/download/v1.3-rc2/sing-box-1.3-rc2-linux-amd64.tar.gz -O - | tar -xz -C /usr/local/bin --strip-components=1 && chmod +x /usr/local/bin/sing-box
+systemctl stop sing-box
 ```
-- **Download sing-box.service and config.json**
+2.禁用sing-box服务的开机自启服务：
 ```
-wget -P /etc/systemd/system https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/sing-box.service && mkdir /usr/local/etc/sing-box && wget -P /usr/local/etc/sing-box https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/config.json
+systemctl disable sing-box
 ```
-- **Test if it works**
+3.删除sing-box的配置文件和开机自启服务文件：
 ```
-/usr/local/bin/sing-box run -c /usr/local/etc/sing-box/config.json
+rm /etc/systemd/system/sing-box.service
 ```
-- **Check the current status**
 ```
-systemctl daemon-reload && systemctl enable --now sing-box && systemctl status sing-box
+rm -rf /usr/local/etc/sing-box
+```
+4.删除sing-box程序文件：
+```
+rm /usr/local/bin/sing-box
+```
