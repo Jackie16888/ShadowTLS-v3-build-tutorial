@@ -8,6 +8,7 @@ apt install -y curl
 bash <(curl -L https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/Install.sh)
 ```
 - **卸载步骤**
+
 1.停止sing-box服务：
 ```
 systemctl stop sing-box
