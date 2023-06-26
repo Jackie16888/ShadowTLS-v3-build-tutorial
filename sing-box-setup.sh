@@ -91,7 +91,7 @@ case $encryption_choice in
     1)
         ss_method="2022-blake3-aes-128-gcm"
         shadowtls_password=$(openssl rand -base64 16)
-        ss_password=$$(openssl rand -base64 16)
+        ss_password=$(openssl rand -base64 16)
         ;;
     2)
         ss_method="2022-blake3-aes-256-gcm"
