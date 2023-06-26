@@ -206,8 +206,8 @@ echo "检查 sing-box 的启动状态..."
 systemctl status sing-box | cat
 
 # 等待一段时间后自动继续执行
-echo "等待2秒后自动继续执行..."
-sleep 2
+echo "等待5秒后自动继续执行..."
+sleep 5
 
 
 # 显示配置信息
