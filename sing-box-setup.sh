@@ -81,17 +81,17 @@ username=${new_username:-$username}
 
 # 生成ShadowTLS密码
 read -p "请选择Shadowsocks加密方式：
-1. 2022-blake3-aes-128-gcm
+1. 2022-blake3-chacha20-poly1305
 2. 2022-blake3-aes-256-gcm
-3. 2022-blake3-chacha20-poly1305
+3. 2022-blake3-aes-128-gcm
 请输入对应的数字 (默认1): " encryption_choice
 encryption_choice=${encryption_choice:-1}
 
 case $encryption_choice in
     1)
-        ss_method="2022-blake3-aes-128-gcm"
-        shadowtls_password=$(openssl rand -base64 16)
-        ss_password=$(openssl rand -base64 16)
+        ss_method="2022-blake3-chacha20-poly1305"
+        shadowtls_password=$(openssl rand -base64 32)
+        ss_password=$(openssl rand -base64 32)
         ;;
     2)
         ss_method="2022-blake3-aes-256-gcm"
@@ -99,15 +99,15 @@ case $encryption_choice in
         ss_password=$(openssl rand -base64 32)
         ;;
     3)
-        ss_method="2022-blake3-chacha20-poly1305"
-        shadowtls_password=$(openssl rand -base64 32)
-        ss_password=$(openssl rand -base64 32)
-        ;;
-    *)
-        echo "无效的选择，默认使用2022-blake3-aes-128-gcm加密方式。"
         ss_method="2022-blake3-aes-128-gcm"
         shadowtls_password=$(openssl rand -base64 16)
         ss_password=$(openssl rand -base64 16)
+        ;;
+    *)
+        echo "无效的选择，默认使用2022-blake3-chacha20-poly1305加密方式。"
+        ss_method="2022-blake3-chacha20-poly1305"
+        shadowtls_password=$(openssl rand -base64 32)
+        ss_password=$(openssl rand -base64 32)
         ;;
 esac
 
