@@ -1,4 +1,4 @@
-# **Illustrate**
+# **illustrate**
 脚本采用官方配置，只是把搭建步骤自动化，无安全隐患，放心使用。
 - **Installation**
 ```
