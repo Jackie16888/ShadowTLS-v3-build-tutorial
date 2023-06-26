@@ -2,6 +2,9 @@
 脚本采用官方配置，只是把搭建步骤自动化，无安全隐患，放心使用。
 - **一键安装**
 ```
+apt install -y curl
+```
+```
 bash <(curl -L https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/Install.sh)
 ```
 - **卸载步骤**
