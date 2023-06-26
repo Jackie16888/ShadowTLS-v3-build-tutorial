@@ -209,6 +209,10 @@ systemctl status sing-box | cat
 echo "等待5秒后自动继续执行..."
 sleep 5
 
+# 重启 sing-box 
+echo "重启 sing-box 服务..."
+systemctl stop sing-box
+systemctl start sing-box
 
 # 显示配置信息
 echo "---------------------"
