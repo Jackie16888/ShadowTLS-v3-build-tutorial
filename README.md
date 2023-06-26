@@ -1,15 +1,16 @@
 # **illustrate**
 This script automatically downloads the sing-box program to the /usr/local/bin directory according to your vps architecture, automatically configures the systemd service for the sing-box, and automatically generates the configuration information of the shadowTLS node. This script is completely open source, and you can use it with confidence.
-- **Installation**
+
+# **Installation**
 ```
 apt install -y curl
 ```
 ```
 bash <(curl -L https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/Install.sh)
 ```
-- **Uninstall**
+# **Uninstall**
 
-1.stop sing-box service：
+- **stop sing-box service**
 ```
 systemctl stop sing-box
 ```
