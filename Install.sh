@@ -24,9 +24,9 @@ sysctl -p
 
 # 下载并安装 sing-box 程序
 if [[ $(arch) == "x86_64" ]]; then
-    wget -c https://github.com/SagerNet/sing-box/releases/download/v1.3-rc2/sing-box-1.3-rc2-linux-amd64.tar.gz -O - | tar -xz -C /usr/local/bin --strip-components=1
+    wget -c https://github.com/SagerNet/sing-box/releases/download/v1.3.0/sing-box-1.3.0-linux-amd64.tar.gz -O - | tar -xz -C /usr/local/bin --strip-components=1
 elif [[ $(arch) == "aarch64" ]]; then
-    wget -c https://github.com/SagerNet/sing-box/releases/download/v1.3-rc2/sing-box-1.3-rc2-linux-arm64.tar.gz -O - | tar -xz -C /usr/local/bin --strip-components=1
+    wget -c https://github.com/SagerNet/sing-box/releases/download/v1.3.0/sing-box-1.3.0-linux-arm64.tar.gz -O - | tar -xz -C /usr/local/bin --strip-components=1
 else
     echo "Unsupported architecture: $(arch)"
     exit 1
