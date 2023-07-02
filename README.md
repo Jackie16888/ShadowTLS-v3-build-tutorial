@@ -6,7 +6,7 @@ sing-box配置文件目录：/usr/local/etc/sing-box/config.json
 
 # **一键安装**
 ```
-apt update && apt-get -y install wget jq tar
+apt update && apt-get -y install wget jq tar git libc6-dev build-essential zlib1g-dev libssl-dev libevent-dev mingw-w64
 ```
 ```
 bash <(curl -L https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/Install.sh)
