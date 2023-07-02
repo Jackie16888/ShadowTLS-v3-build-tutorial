@@ -333,7 +333,7 @@ if command -v ufw >/dev/null 2>&1; then
     fi
 
     if ! ufw status | grep -q " $listen_port/tcp"; then
-        ufw allow "$listen_port"/tcp
+        ufw allow "$listen_port"
     fi
 
     echo "防火墙配置已更新。"
@@ -345,6 +345,7 @@ start_sing_box_service() {
     systemctl daemon-reload
     systemctl enable sing-box
     systemctl start sing-box
+    systemctl restart sing-box
 
     if [[ $? -eq 0 ]]; then
         echo -e "${GREEN}sing-box 服务已启动。${NC}"
