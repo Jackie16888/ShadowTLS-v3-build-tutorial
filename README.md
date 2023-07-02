@@ -1,11 +1,11 @@
 # **说明**
-##该脚本有自行编译和下载预编译版的sing-box两种选择，所有代码均来自官方文档;该脚本完全开源，您可以放心使用！
+### 该脚本有自行编译和下载预编译版的sing-box两种选择，所有代码均来自官方文档;该脚本完全开源，您可以放心使用！
 
-###sing-box可执行文件目录：/usr/local/bin/sing-box
+### sing-box可执行文件目录：/usr/local/bin/sing-box
 
-###sing-box的systemd服务目录：/etc/systemd/system/sing-box.service
+### sing-box的systemd服务目录：/etc/systemd/system/sing-box.service
 
-###sing-box配置文件目录：/usr/local/etc/sing-box/config.json
+### sing-box配置文件目录：/usr/local/etc/sing-box/config.json
 
 # **一键安装**
 ```
