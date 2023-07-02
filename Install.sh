@@ -114,6 +114,22 @@ download_precompiled_sing_box() {
     echo -e "${GREEN}sing-box 安装成功${NC}"
 }
 
+# 检查防火墙配置
+check_firewall_configuration() {
+    if command -v ufw >/dev/null 2>&1; then
+        echo "检查防火墙配置..."
+        if ! ufw status | grep -q "Status: active"; then
+            ufw enable
+        fi
+
+        if ! ufw status | grep -q " $listen_port"; then
+            ufw allow "$listen_port"
+        fi
+
+        echo "防火墙配置已更新。"
+    fi
+}
+
 # 配置 sing-box 开机自启服务
 configure_sing_box_service() {
     echo "配置 sing-box 开机自启服务..."
@@ -282,6 +298,22 @@ display_sing_box_config() {
     echo -e "${CYAN}Shadowsocks 密码: $(jq -r '.inbounds[1].password' $config_file)${NC}"
 }
 
+# 检查防火墙配置
+check_firewall_configuration() {
+    if command -v ufw >/dev/null 2>&1; then
+        echo "检查防火墙配置..."
+        if ! ufw status | grep -q "Status: active"; then
+            ufw enable
+        fi
+
+        if ! ufw status | grep -q " $listen_port"; then
+            ufw allow "$listen_port"
+        fi
+
+        echo "防火墙配置已更新。"
+    fi
+}
+
 # 安装 sing-box
 install_sing_box() {
     echo "开始安装 sing-box..."
@@ -326,18 +358,21 @@ configure_sing_box() {
 }
 
 # 检查防火墙配置
-if command -v ufw >/dev/null 2>&1; then
-    echo "检查防火墙配置..."
-    if ! ufw status | grep -q "Status: active"; then
-        ufw enable
-    fi
+check_firewall_configuration() {
+    if command -v ufw >/dev/null 2>&1; then
+        echo "检查防火墙配置..."
+        if ! ufw status | grep -q "Status: active"; then
+            ufw enable
+        fi
 
-    if ! ufw status | grep -q " $listen_port"; then
-        ufw allow "$listen_port"
-    fi
+        if ! ufw status | grep -q " $listen_port"; then
+            ufw allow "$listen_port"
+        fi
 
-    echo "防火墙配置已更新。"
-fi
+        echo "防火墙配置已更新。"
+    fi
+}
+    
 
 # 启动 sing-box 服务
 start_sing_box_service() {
