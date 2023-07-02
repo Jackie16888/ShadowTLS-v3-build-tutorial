@@ -1,0 +1,41 @@
+{
+  "inbounds": [
+    {
+      "type": "shadowtls",
+      "tag": "st-in",
+      "listen": "::",
+      "listen_port": 443,
+      "version": 3,
+      "users": [
+        {
+          "name": "0ZSd9Bhy",
+          "password": "/PUVxVQIliTmhZ8JVx59Wh66/WIsjcXnv+4/hECprd8="
+        }
+      ],
+      "handshake": {
+        "server": "www.apple.com",
+        "server_port": 443
+      },
+      "strict_mode": true,
+      "detour": "ss-in"
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "ss-in",
+      "listen": "127.0.0.1",
+      "network": "tcp",
+      "method": "2022-blake3-chacha20-poly1305",
+      "password": "guL3+aCmtSFdaPGE20mvyH8FBi8yWd3dP7ugBlwkP6Q="
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "block",
+      "tag": "block"
+    }
+  ]
+}
