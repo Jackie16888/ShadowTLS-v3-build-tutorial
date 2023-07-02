@@ -27,11 +27,11 @@ wget -c "https://github.com/SagerNet/sing-box/releases/download/v1.3.0/sing-box-
 ```
 - ## **配置sing-box的systemd服务**
 ```
-systemctl disable sing-box
+wget -P /etc/systemd/system https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/sing-box.service
 ```
-- **Delete the configuration file and self-start service file of sing-box**
+- ## **下载并修改sing-box配置文件**
 ```
-rm /etc/systemd/system/sing-box.service
+mkdir /usr/local/etc/sing-box && wget -P /usr/local/etc/sing-box https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/config.json
 ```
 ```
 rm -rf /usr/local/etc/sing-box
