@@ -114,7 +114,7 @@ download_precompiled_sing_box() {
     echo -e "${GREEN}sing-box 安装成功${NC}"
 }
 
-# 检查防火墙配置
+# 检查防火墙规则
 check_firewall_configuration() {
     if command -v ufw >/dev/null 2>&1; then
         echo "检查防火墙配置..."
