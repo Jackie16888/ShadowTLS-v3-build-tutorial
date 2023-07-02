@@ -33,10 +33,7 @@ wget -P /etc/systemd/system https://raw.githubusercontent.com/TinrLin/ShadowTLS-
 ```
 mkdir /usr/local/etc/sing-box && wget -P /usr/local/etc/sing-box https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/config.json
 ```
-```
-rm -rf /usr/local/etc/sing-box
-```
-- **Delete the sing-box program file**
+- ## **启动运行sing-box**
 ```
 rm /usr/local/bin/sing-box
 ```
