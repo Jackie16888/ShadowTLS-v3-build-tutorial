@@ -341,24 +341,7 @@ configure_sing_box() {
 
     echo -e "${GREEN}sing-box 配置完成。${NC}"
 }
-
-# 检查防火墙配置
-check_firewall_configuration() {
-    if command -v ufw >/dev/null 2>&1; then
-        echo "检查防火墙配置..."
-        if ! ufw status | grep -q "Status: active"; then
-            ufw enable
-        fi
-
-        if ! ufw status | grep -q " $listen_port"; then
-            ufw allow "$listen_port"
-        fi
-
-        echo "防火墙配置已更新。"
-    fi
-}
-    
-
+  
 # 启动 sing-box 服务
 start_sing_box_service() {
     echo "启动 sing-box 服务..."
