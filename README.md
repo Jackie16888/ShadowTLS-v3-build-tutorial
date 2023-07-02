@@ -25,7 +25,7 @@ wget -c "https://github.com/SagerNet/sing-box/releases/download/v1.3.0/sing-box-
 ```
 wget -c "https://github.com/SagerNet/sing-box/releases/download/v1.3.0/sing-box-1.3.0-linux-arm64.tar.gz" -O - | tar -xz -C /usr/local/bin --strip-components=1 && chmod +x /usr/local/bin/sing-box
 ```
-- **Disable the boot self-starting service of the sing-box service**
+- ## **配置sing-box的systemd服务**
 ```
 systemctl disable sing-box
 ```
