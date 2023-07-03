@@ -18,7 +18,7 @@ bash <(curl -L https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tuto
 ```
 wget -c "https://github.com/SagerNet/sing-box/releases/download/v1.3.0/sing-box-1.3.0-linux-amd64.tar.gz" -O - | tar -xz -C /usr/local/bin --strip-components=1 && chmod +x /usr/local/bin/sing-box
 ```
-- AMD core
+- ARM core
 ```
 wget -c "https://github.com/SagerNet/sing-box/releases/download/v1.3.0/sing-box-1.3.0-linux-arm64.tar.gz" -O - | tar -xz -C /usr/local/bin --strip-components=1 && chmod +x /usr/local/bin/sing-box
 ```
