@@ -294,7 +294,7 @@ display_sing_box_config() {
     echo -e "${CYAN}ShadowTLS 节点配置信息：${NC}"
     echo -e "${CYAN}用户名: $(jq -r '.inbounds[0].users[0].name' $config_file)${NC}"
     echo -e "${CYAN}监听端口: $(jq -r '.inbounds[0].listen_port' $config_file)${NC}"
-    echo -e "${CYAN}握手服务器地址: $(jq -r '.inbounds[0].handshake_server' $config_file)${NC}"
+    echo -e "${CYAN}握手服务器地址: $(jq -r '.inbounds[0].handshake.server' $config_file)${NC}"
     echo -e "${CYAN}ShadowTLS 密码: $(jq -r '.inbounds[0].users[0].password' $config_file)${NC}"
     echo -e "${CYAN}Shadowsocks 密码: $(jq -r '.inbounds[1].password' $config_file)${NC}"
 }
