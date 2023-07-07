@@ -9,7 +9,7 @@ NC='\033[0m' # No Color
 
 # 安装依赖
 check_dependencies() {
-    local packages=("wget" "jq" "openssl")
+    local packages=("wget" "jq" "openssl" "tar" "git" "libc6-dev" "build-essential" "zlib1g-dev" "libssl-dev" "libevent-dev" "mingw-w64")
     
     for package in "${packages[@]}"; do
         if ! command -v "$package" &> /dev/null; then
