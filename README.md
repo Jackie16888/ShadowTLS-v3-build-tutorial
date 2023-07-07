@@ -6,8 +6,10 @@
 
 # **Script installation**
 ```
-apt update && apt-get -y install wget jq tar git libc6-dev build-essential zlib1g-dev libssl-dev libevent-dev mingw-w64 openssl
+apt update && apt -y install curl
 ```
+```
+yum update && yum -y install curl
 ```
 bash <(curl -L https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/Install.sh)
 ```
