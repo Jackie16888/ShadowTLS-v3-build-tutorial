@@ -1,5 +1,6 @@
 # **illustrate**
 ### The script has two options of self-compilation and downloading the pre-compiled version of sing-box,all codes are from official documentation;The script is completely open source,you can use it with confidence!
+### Script supports custom port, supports multi-user.
 ### Sing-box executable file directory: /usr/local/bin/sing-box.
 ### The systemd service directory of sing-box: /etc/systemd/system/sing-box.service.
 ### Sing-box configuration file directory: /usr/local/etc/sing-box/config.json.
