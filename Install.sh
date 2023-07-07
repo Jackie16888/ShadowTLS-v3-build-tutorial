@@ -7,6 +7,25 @@ YELLOW='\033[0;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# 安装依赖
+check_dependencies() {
+    local packages=("wget" "jq" "openssl")
+    
+    for package in "${packages[@]}"; do
+        if ! command -v "$package" &> /dev/null; then
+            echo "安装依赖: $package"
+            if [[ -n $(command -v apt-get) ]]; then
+                apt-get -y install "$package"
+            elif [[ -n $(command -v yum) ]]; then
+                yum -y install "$package"
+            else
+                echo "无法安装依赖，请手动安装: $package"
+                exit 1
+            fi
+        fi
+    done
+}
+
 # 开启 BBR
 enable_bbr() {
     if ! grep -q "net.core.default_qdisc=fq" /etc/sysctl.conf; then
@@ -47,6 +66,25 @@ select_sing_box_install_option() {
     echo -e "${CYAN}请选择 sing-box 的安装方式：${NC}"
     echo -e "${CYAN}1. 自行编译安装${NC}"
     echo -e "${CYAN}2. 下载预编译版本${NC}"
+
+    local install_option
+    read -p "$(echo -e "${CYAN}请选择 [1-2]: ${NC}")" install_option
+
+    case $install_option in
+        1)
+            install_go
+            compile_install_sing_box
+            ;;
+        2)
+            download_precompiled_sing_box
+            ;;
+        *)
+            echo -e "${RED}无效的选择，请重新输入。${NC}"
+            install_sing_box
+            ;;
+    esac
+
+    echo -e "${GREEN}sing-box 安装完成。${NC}"
 }
 
 # 安装 Go
@@ -150,22 +188,8 @@ LimitNOFILE=infinity
 WantedBy=multi-user.target" | tee /etc/systemd/system/sing-box.service
 }
 
-# 生成随机用户名
-generate_random_username() {
-    local username=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
-    echo "$username"
-}
-
-# 配置 sing-box 配置文件
-configure_sing_box_config_file() {
-    local config_dir="/usr/local/etc/sing-box"
-    local config_file="$config_dir/config.json"
-
-    check_and_create_folder "$config_dir"
-    check_and_create_file "$config_file"
-
-    # 设置监听端口及用户名
-    local username=$(generate_random_username)
+# 设置监听端口
+set_listen_port() {
     read -p "$(echo -e "${CYAN}请输入监听端口 (默认443):  ${NC}")" listen_port
 
     while true; do
@@ -181,13 +205,23 @@ configure_sing_box_config_file() {
             read -p "$(echo -e "${GREEN}请输入监听端口 (默认443): ${NC}")" listen_port
         fi
     done
+}
 
+# 设置用户名
+set_username() {
     read -p "$(echo -e "${CYAN}请输入用户名 (默认随机生成): ${NC}")" new_username
-    username=${new_username:-$username}
-
+    username=${new_username:-$(generate_random_username)}
     echo -e "${GREEN}用户名: $username${NC}"
+}
 
-    # 生成 ShadowTLS 密码
+# 生成随机用户名
+generate_random_username() {
+    local username=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
+    echo "$username"
+}
+
+# 生成 ShadowTLS 密码
+generate_shadowtls_password() {
     read -p "$(echo -e "${CYAN}请选择 Shadowsocks 加密方式：
 1. 2022-blake3-chacha20-poly1305
 2. 2022-blake3-aes-256-gcm
@@ -220,7 +254,31 @@ configure_sing_box_config_file() {
     esac
 
     echo -e "${GREEN}加密方式: $ss_method${NC}"
+}
 
+# 添加用户
+add_user() {
+    local user_password=""
+    if [[ $encryption_choice == 1 || $encryption_choice == 2 ]]; then
+        user_password=$(openssl rand -base64 32)
+    elif [[ $encryption_choice == 3 ]]; then
+        user_password=$(openssl rand -base64 16)
+    fi
+
+    read -p "$(echo -e "${CYAN}请输入用户名 (默认随机生成): ${NC}")" new_username
+    local new_user=${new_username:-$(generate_random_username)}
+
+    users+=",{
+      \"name\": \"$new_user\",
+      \"password\": \"$user_password\"
+    }"
+
+    echo -e "${GREEN}用户名: $new_user${NC}"
+    echo -e "${GREEN}ShadowTLS 密码: $user_password${NC}"
+}
+
+# 设置握手服务器地址
+set_handshake_server() {
     read -p "$(echo -e "${CYAN}请输入握手服务器地址 (默认www.apple.com): ${NC}")" handshake_server
     handshake_server=${handshake_server:-www.apple.com}
 
@@ -228,7 +286,7 @@ configure_sing_box_config_file() {
     echo "正在验证握手服务器支持的TLS版本..."
 
     while true; do
-        openssl_output=$(timeout 20s openssl s_client -connect "$handshake_server:443" -tls1_3 2>&1)
+        openssl_output=$(timeout 90s openssl s_client -connect "$handshake_server:443" -tls1_3 2>&1)
 
         if [[ $openssl_output == *"Protocol  : TLSv1.3"* ]]; then
             echo -e "${GREEN}握手服务器支持TLS 1.3。${NC}"
@@ -240,6 +298,36 @@ configure_sing_box_config_file() {
             echo "正在验证握手服务器支持的TLS版本..."
         fi
     done
+}
+
+# 配置 sing-box 配置文件
+configure_sing_box_config_file() {
+    local config_dir="/usr/local/etc/sing-box"
+    local config_file="$config_dir/config.json"
+
+    check_and_create_folder "$config_dir"
+    check_and_create_file "$config_file"
+
+    set_listen_port
+    set_username
+    generate_shadowtls_password
+
+    local users="{
+          \"name\": \"$username\",
+          \"password\": \"$shadowtls_password\"
+        }"
+
+    local add_multiple_users="Y"
+
+    while [[ $add_multiple_users == [Yy] ]]; do
+        read -p "$(echo -e "${CYAN}是否添加多用户？(Y/N，默认为N): ${NC}")" add_multiple_users
+
+        if [[ $add_multiple_users == [Yy] ]]; then
+            add_user
+        fi
+    done
+
+    set_handshake_server
 
     # 写入配置文件
     echo "{
@@ -251,10 +339,7 @@ configure_sing_box_config_file() {
       \"listen_port\": $listen_port,
       \"version\": 3,
       \"users\": [
-        {
-          \"name\": \"$username\",
-          \"password\": \"$shadowtls_password\"
-        }
+        $users
       ],
       \"handshake\": {
         \"server\": \"$handshake_server\",
@@ -282,9 +367,7 @@ configure_sing_box_config_file() {
       \"tag\": \"block\"
     }
   ]
-}" > "$config_file"
-
-    echo "配置文件 $config_file 创建成功。"
+}" | jq '.' > "$config_file"
 }
 
 # 显示 sing-box 配置信息
@@ -292,39 +375,20 @@ display_sing_box_config() {
     local config_file="/usr/local/etc/sing-box/config.json"
 
     echo -e "${CYAN}ShadowTLS 节点配置信息：${NC}"
-    echo -e "${CYAN}用户名: $(jq -r '.inbounds[0].users[0].name' $config_file)${NC}"
-    echo -e "${CYAN}监听端口: $(jq -r '.inbounds[0].listen_port' $config_file)${NC}"
-    echo -e "${CYAN}握手服务器地址: $(jq -r '.inbounds[0].handshake.server' $config_file)${NC}"
-    echo -e "${CYAN}ShadowTLS 密码: $(jq -r '.inbounds[0].users[0].password' $config_file)${NC}"
-    echo -e "${CYAN}Shadowsocks 密码: $(jq -r '.inbounds[1].password' $config_file)${NC}"
+    echo -e "${GREEN}监听端口: $listen_port${NC}"
+    jq -r '.inbounds[0].users[] | "ShadowTLS 密码: \(.password)"' "$config_file" | while IFS= read -r line; do
+    echo -e "${GREEN}$line${NC}"
+done    
+    echo -e "${GREEN}Shadowsocks 密码: $ss_password${NC}"
 }
 
 # 安装 sing-box
 install_sing_box() {
+    check_dependencies
+    enable_bbr
     echo "开始安装 sing-box..."
 
-    # 选择安装方式
     select_sing_box_install_option
-
-    local install_option
-    read -p "$(echo -e "${CYAN}请选择 [1-2]: ${NC}")" install_option
-
-    case $install_option in
-        1)
-            install_go
-            compile_install_sing_box
-            ;;
-        2)
-            download_precompiled_sing_box
-            ;;
-        *)
-            echo -e "${RED}无效的选择，请重新输入。${NC}"
-            install_sing_box
-            ;;
-    esac
-
-    echo -e "${GREEN}sing-box 安装完成。${NC}"
-
     configure_sing_box
     check_firewall_configuration
     start_sing_box_service
