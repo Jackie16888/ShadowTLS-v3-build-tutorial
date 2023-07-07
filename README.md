@@ -12,6 +12,7 @@ apt update && apt -y install curl
 ```
 yum update && yum -y install curl
 ```
+```
 bash <(curl -L https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/Install.sh)
 ```
 # **Manual installation**
