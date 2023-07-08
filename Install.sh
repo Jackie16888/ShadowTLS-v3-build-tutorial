@@ -64,8 +64,8 @@ check_and_create_file() {
 # 选择安装方式
 select_sing_box_install_option() {
     echo -e "${CYAN}请选择 sing-box 的安装方式：${NC}"
-    echo -e "${CYAN}1. 自行编译安装${NC}"
-    echo -e "${CYAN}2. 下载预编译版本${NC}"
+    echo -e "  ${CYAN}[1]. 自行编译安装${NC}"
+    echo -e "  ${CYAN}[2]. 下载预编译版本${NC}"
 
     local install_option
     read -p "$(echo -e "${CYAN}请选择 [1-2]: ${NC}")" install_option
@@ -83,8 +83,6 @@ select_sing_box_install_option() {
             install_sing_box
             ;;
     esac
-
-    echo -e "${GREEN}sing-box 安装完成。${NC}"
 }
 
 # 安装 Go
@@ -165,6 +163,32 @@ check_firewall_configuration() {
         fi
 
         echo "防火墙配置已更新。"
+    elif command -v iptables >/dev/null 2>&1; then
+        echo "检查防火墙配置..."
+        if ! iptables -L | grep -q "Chain INPUT (policy ACCEPT)"; then
+            iptables -P INPUT ACCEPT
+        fi
+
+        if ! iptables -L | grep -q " $listen_port"; then
+            iptables -A INPUT -p tcp --dport "$listen_port" -j ACCEPT
+        fi
+
+        echo "防火墙配置已更新。"
+    elif command -v firewalld >/dev/null 2>&1; then
+        echo "检查防火墙配置..."
+        if ! firewall-cmd --state | grep -q "running"; then
+            systemctl start firewalld
+            systemctl enable firewalld
+        fi
+
+        if ! firewall-cmd --list-ports | grep -q "$listen_port/tcp"; then
+            firewall-cmd --add-port="$listen_port/tcp" --permanent
+            firewall-cmd --reload
+        fi
+
+        echo "防火墙配置已更新。"
+    else
+        echo "无法检测到适用的防火墙配置工具，请手动配置防火墙。"
     fi
 }
 
@@ -373,13 +397,17 @@ configure_sing_box_config_file() {
 # 显示 sing-box 配置信息
 display_sing_box_config() {
     local config_file="/usr/local/etc/sing-box/config.json"
-
+    echo "================================================================"
     echo -e "${CYAN}ShadowTLS 节点配置信息：${NC}"
+    echo "----------------------------------------------------------------"
     echo -e "${GREEN}监听端口: $listen_port${NC}"
+    echo "----------------------------------------------------------------"
     jq -r '.inbounds[0].users[] | "ShadowTLS 密码: \(.password)"' "$config_file" | while IFS= read -r line; do
     echo -e "${GREEN}$line${NC}"
-done    
+done  
+    echo "----------------------------------------------------------------"  
     echo -e "${GREEN}Shadowsocks 密码: $ss_password${NC}"
+    echo "================================================================"
 }
 
 # 安装 sing-box
@@ -426,14 +454,17 @@ start_sing_box_service() {
 
 # 主菜单
 main_menu() {
-    echo -e "${CYAN}欢迎使用 sing-box 安装脚本！${NC}"
+echo -e "${GREEN}               ------------------------------------------------------------------------------------ ${NC}"
+echo -e "${GREEN}               |                          欢迎使用 ShadowTLS 安装程序                             |${NC}"
+echo -e "${GREEN}               |                      项目地址:https://github.com/TinrLin                         |${NC}"
+echo -e "${GREEN}               ------------------------------------------------------------------------------------${NC}"
     echo -e "${CYAN}请选择要执行的操作：${NC}"
-    echo -e "${CYAN}1. 安装 sing-box 服务${NC}"
-    echo -e "${CYAN}2. 停止 sing-box 服务${NC}"
-    echo -e "${CYAN}3. 重启 sing-box 服务${NC}"
-    echo -e "${CYAN}4. 查看 sing-box 日志${NC}"
-    echo -e "${CYAN}5. 卸载 sing-box${NC}"
-    echo -e "${CYAN}6. 退出脚本${NC}"
+    echo -e "  ${CYAN}[1]. 安装 sing-box 服务${NC}"
+    echo -e "  ${CYAN}[2]. 停止 sing-box 服务${NC}"
+    echo -e "  ${CYAN}[3]. 重启 sing-box 服务${NC}"
+    echo -e "  ${CYAN}[4]. 查看 sing-box 日志${NC}"
+    echo -e "  ${CYAN}[5]. 卸载 sing-box 服务${NC}"
+    echo -e "  ${CYAN}[0]. 退出脚本${NC}"
 
     local choice
     read -p "$(echo -e "${CYAN}请选择 [1-6]: ${NC}")" choice
@@ -454,8 +485,8 @@ main_menu() {
         5)
             uninstall_sing_box
             ;;
-        6)
-            echo -e "${GREEN}感谢使用 sing-box 安装脚本！再见！${NC}"
+        0)
+            echo -e "${GREEN}感谢使用 ShadowTLS 安装脚本！再见！${NC}"
             exit 0
             ;;
         *)
