@@ -2,6 +2,7 @@
 ### The script has two options of self-compilation and downloading the pre-compiled version of sing-box.
 ### Script supports custom port, supports multi-user.
 ### The script supports CentOS 8+, Debian 10+, Ubuntu 20+ operating systems.
+### Openssl version ≥ 1.1.1 is required to run this script.
 ### All codes are from official documentation;The script is completely open source,you can use it with confidence!
 ### Sing-box executable file directory: /usr/local/bin/sing-box.
 ### The systemd service directory of sing-box: /etc/systemd/system/sing-box.service.
