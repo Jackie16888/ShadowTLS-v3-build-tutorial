@@ -9,7 +9,7 @@ NC='\033[0m' # No Color
 
 # 安装依赖
 check_dependencies() {
-    local packages=("wget" "jq" "openssl" "tar" "git" "libc6-dev" "build-essential" "zlib1g-dev" "libssl-dev" "libevent-dev" "mingw-w64")
+    local packages=("wget" "jq" "openssl" "tar" "git")
     
     for package in "${packages[@]}"; do
         if ! command -v "$package" &> /dev/null; then
@@ -162,7 +162,7 @@ check_firewall_configuration() {
             ufw allow "$listen_port"
         fi
 
-        echo "防火墙配置已更新。"
+        echo -e "${GREEN}防火墙配置已更新。${NC}"
     elif command -v iptables >/dev/null 2>&1; then
         echo "检查防火墙配置..."
         if ! iptables -L | grep -q "Chain INPUT (policy ACCEPT)"; then
@@ -173,7 +173,7 @@ check_firewall_configuration() {
             iptables -A INPUT -p tcp --dport "$listen_port" -j ACCEPT
         fi
 
-        echo "防火墙配置已更新。"
+        echo -e "${GREEN}防火墙配置已更新。${NC}"
     elif command -v firewalld >/dev/null 2>&1; then
         echo "检查防火墙配置..."
         if ! firewall-cmd --state | grep -q "running"; then
@@ -186,9 +186,9 @@ check_firewall_configuration() {
             firewall-cmd --reload
         fi
 
-        echo "防火墙配置已更新。"
+        echo -e "${GREEN}防火墙配置已更新。${NC}"
     else
-        echo "无法检测到适用的防火墙配置工具，请手动配置防火墙。"
+        echo -e "${RED}无法检测到适用的防火墙配置工具，请手动配置防火墙。${NC}"
     fi
 }
 
@@ -303,25 +303,41 @@ add_user() {
 
 # 设置握手服务器地址
 set_handshake_server() {
+    local handshake_server=""
+    local openssl_output=""
+
     read -p "$(echo -e "${CYAN}请输入握手服务器地址 (默认www.apple.com): ${NC}")" handshake_server
     handshake_server=${handshake_server:-www.apple.com}
 
     # 验证握手服务器是否支持TLS 1.3
     echo "正在验证握手服务器支持的TLS版本..."
 
-    while true; do
-        openssl_output=$(timeout 90s openssl s_client -connect "$handshake_server:443" -tls1_3 2>&1)
+    local is_supported="false"
 
-        if [[ $openssl_output == *"Protocol  : TLSv1.3"* ]]; then
-            echo -e "${GREEN}握手服务器支持TLS 1.3。${NC}"
-            break
-        else
-            echo -e "${RED}错误：握手服务器不支持TLS 1.3，请重新输入握手服务器地址。${NC}"
-            read -p "$(echo -e "${GREEN}请输入握手服务器地址 (默认www.apple.com): ${NC}")" handshake_server
-            handshake_server=${handshake_server:-www.apple.com}
-            echo "正在验证握手服务器支持的TLS版本..."
+    if command -v openssl >/dev/null 2>&1; then
+        local openssl_version=$(openssl version)
+
+        if [[ $openssl_version == *"OpenSSL"* ]]; then
+            while true; do
+                openssl_output=$(timeout 90s openssl s_client -connect "$handshake_server:443" -tls1_3 2>&1)
+
+                if [[ $openssl_output == *"Protocol  : TLSv1.3"* ]]; then
+                    is_supported="true"
+                    echo -e "${GREEN}握手服务器支持TLS 1.3。${NC}"
+                    break
+                else
+                    echo -e "${RED}错误：握手服务器不支持TLS 1.3，请重新输入握手服务器地址。${NC}"
+                    read -p "$(echo -e "${CYAN}请输入握手服务器地址 (默认www.apple.com): ${NC}")" handshake_server
+                    handshake_server=${handshake_server:-www.apple.com}
+                    echo "正在验证握手服务器支持的TLS版本..."
+                fi
+            done
         fi
-    done
+    fi
+
+    if [[ $is_supported == "false" ]]; then
+        echo -e "${YELLOW}警告：无法验证握手服务器支持的TLS版本。请确保握手服务器支持TLS 1.3。${NC}"
+    fi
 }
 
 # 配置 sing-box 配置文件
@@ -412,6 +428,7 @@ done
 
 # 安装 sing-box
 install_sing_box() {
+
     check_dependencies
     enable_bbr
     echo "开始安装 sing-box..."
