@@ -1,4 +1,4 @@
-# **illustrate**
+# **Illustrate**
 ### The script has two options of self-compilation and downloading the pre-compiled version of sing-box.
 ### Script supports custom port, supports multi-user.
 ### The script supports CentOS 8+, Debian 10+, Ubuntu 20+ operating systems.
