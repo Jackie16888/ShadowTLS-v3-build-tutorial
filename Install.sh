@@ -8,7 +8,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # 安装依赖
-check_dependencies() {
+function check_dependencies() {
     local packages=("wget" "jq" "openssl" "tar" "git")
     
     for package in "${packages[@]}"; do
@@ -27,7 +27,7 @@ check_dependencies() {
 }
 
 # 开启 BBR
-enable_bbr() {
+function enable_bbr() {
     if ! grep -q "net.core.default_qdisc=fq" /etc/sysctl.conf; then
         echo "开启 BBR..."
         echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
@@ -40,7 +40,7 @@ enable_bbr() {
 }
 
 # 检查是否存在文件夹，不存在则创建
-check_and_create_folder() {
+function check_and_create_folder() {
     local folder=$1
     if [ ! -d "$folder" ]; then
         mkdir -p "$folder"
@@ -51,7 +51,7 @@ check_and_create_folder() {
 }
 
 # 检查是否存在文件，不存在则创建
-check_and_create_file() {
+function check_and_create_file() {
     local file=$1
     if [ ! -f "$file" ]; then
         touch "$file"
@@ -62,7 +62,7 @@ check_and_create_file() {
 }
 
 # 选择安装方式
-select_sing_box_install_option() {
+function select_sing_box_install_option() {
     echo -e "${CYAN}请选择 sing-box 的安装方式：${NC}"
     echo -e "  ${CYAN}[1]. 自行编译安装${NC}"
     echo -e "  ${CYAN}[2]. 下载预编译版本${NC}"
@@ -86,7 +86,7 @@ select_sing_box_install_option() {
 }
 
 # 安装 Go
-install_go() {
+function install_go() {
     if ! command -v go &> /dev/null; then
          echo "下载并安装 Go..."
         local go_arch
@@ -110,7 +110,7 @@ install_go() {
 }
 
 #安装sing-box
-compile_install_sing_box() {
+function compile_install_sing_box() {
     echo "编译安装 sing-box..."
     if ! command -v go &> /dev/null; then
         echo -e "${RED}Go 未安装，请先安装 Go。${NC}"
@@ -134,7 +134,7 @@ compile_install_sing_box() {
 }
 
 # 下载预编译版 sing-box
-download_precompiled_sing_box() {
+function download_precompiled_sing_box() {
     if [[ $(arch) == "x86_64" ]]; then
         echo "下载并安装预编译的 sing-box (AMD 内核)..."
         wget -c "https://github.com/SagerNet/sing-box/releases/download/v1.3.0/sing-box-1.3.0-linux-amd64.tar.gz" -O - | tar -xz -C /usr/local/bin --strip-components=1
@@ -151,7 +151,7 @@ download_precompiled_sing_box() {
 }
 
 # 检查防火墙配置
-check_firewall_configuration() {
+function check_firewall_configuration() {
     local os_name=$(uname -s)
     local firewall
 
@@ -216,7 +216,7 @@ check_firewall_configuration() {
 }
 
 # 配置 sing-box 开机自启服务
-configure_sing_box_service() {
+function configure_sing_box_service() {
     echo "配置 sing-box 开机自启服务..."
     echo "[Unit]
 Description=sing-box service
@@ -236,7 +236,7 @@ WantedBy=multi-user.target" | tee /etc/systemd/system/sing-box.service
 }
 
 # 设置监听端口
-set_listen_port() {
+function set_listen_port() {
     read -p "$(echo -e "${CYAN}请输入监听端口 (默认443):  ${NC}")" listen_port
 
     while true; do
@@ -255,20 +255,20 @@ set_listen_port() {
 }
 
 # 设置用户名
-set_username() {
+function set_username() {
     read -p "$(echo -e "${CYAN}请输入用户名 (默认随机生成): ${NC}")" new_username
     username=${new_username:-$(generate_random_username)}
     echo -e "${GREEN}用户名: $username${NC}"
 }
 
 # 生成随机用户名
-generate_random_username() {
+function generate_random_username() {
     local username=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
     echo "$username"
 }
 
 # 生成 ShadowTLS 密码
-generate_shadowtls_password() {
+function generate_shadowtls_password() {
     read -p "$(echo -e "${CYAN}请选择 Shadowsocks 加密方式：
 1. 2022-blake3-chacha20-poly1305
 2. 2022-blake3-aes-256-gcm
@@ -304,7 +304,7 @@ generate_shadowtls_password() {
 }
 
 # 添加用户
-add_user() {
+function add_user() {
     local user_password=""
     if [[ $encryption_choice == 1 || $encryption_choice == 2 ]]; then
         user_password=$(openssl rand -base64 32)
@@ -325,7 +325,7 @@ add_user() {
 }
 
 # 设置握手服务器地址
-set_handshake_server() {
+function set_handshake_server() {
     local handshake_server=""
     local openssl_output=""
 
@@ -365,7 +365,7 @@ set_handshake_server() {
 }
 
 # 配置 sing-box 配置文件
-configure_sing_box_config_file() {
+function configure_sing_box_config_file() {
     local config_dir="/usr/local/etc/sing-box"
     local config_file="$config_dir/config.json"
 
@@ -435,7 +435,7 @@ configure_sing_box_config_file() {
 }
 
 # 显示 sing-box 配置信息
-display_sing_box_config() {
+function display_sing_box_config() {
     local config_file="/usr/local/etc/sing-box/config.json"
     echo "================================================================"
     echo -e "${CYAN}ShadowTLS 节点配置信息：${NC}"
@@ -451,7 +451,7 @@ done
 }
 
 # 安装 sing-box
-install_sing_box() {
+function install_sing_box() {
 
     check_dependencies
     enable_bbr
@@ -464,7 +464,7 @@ install_sing_box() {
 }
 
 # 配置 sing-box
-configure_sing_box() {
+function configure_sing_box() {
     echo "开始配置 sing-box..."
 
     echo "配置 sing-box 服务..."
@@ -477,7 +477,7 @@ configure_sing_box() {
 }
   
 # 启动 sing-box 服务
-start_sing_box_service() {
+function start_sing_box_service() {
     echo "启动 sing-box 服务..."
     systemctl daemon-reload
     systemctl enable sing-box
@@ -494,7 +494,7 @@ start_sing_box_service() {
 }
 
 # 主菜单
-main_menu() {
+function main_menu() {
 echo -e "${GREEN}               ------------------------------------------------------------------------------------ ${NC}"
 echo -e "${GREEN}               |                          欢迎使用 ShadowTLS 安装程序                             |${NC}"
 echo -e "${GREEN}               |                      项目地址:https://github.com/TinrLin                         |${NC}"
@@ -538,7 +538,7 @@ echo -e "${GREEN}               ------------------------------------------------
 }
 
 # 停止 sing-box 服务
-stop_sing_box_service() {
+function stop_sing_box_service() {
     echo "停止 sing-box 服务..."
     systemctl stop sing-box
 
@@ -550,7 +550,7 @@ stop_sing_box_service() {
 }
 
 # 重启 sing-box 服务
-restart_sing_box_service() {
+function restart_sing_box_service() {
     echo "重启 sing-box 服务..."
     systemctl restart sing-box
 
@@ -562,13 +562,13 @@ restart_sing_box_service() {
 }
 
 # 查看 sing-box 服务日志
-view_sing_box_log() {
+function view_sing_box_log() {
     echo "正在查看 sing-box 服务日志..."
     journalctl -u sing-box -f
 }
 
 # 卸载 sing-box
-uninstall_sing_box() {
+function uninstall_sing_box() {
     echo "开始卸载 sing-box..."
 
     stop_sing_box_service
