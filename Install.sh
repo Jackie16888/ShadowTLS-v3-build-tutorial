@@ -152,59 +152,67 @@ download_precompiled_sing_box() {
 
 # 检查防火墙配置
 check_firewall_configuration() {
-    if command -v ufw >/dev/null 2>&1 && command -v iptables >/dev/null 2>&1; then
-        echo "检查防火墙配置..."
-        if ! ufw status | grep -q "Status: active"; then
-            ufw enable
-        fi
+    local os_name=$(uname -s)
+    local firewall
 
-        if ! ufw status | grep -q " $listen_port"; then
-            ufw allow "$listen_port"
+    if [[ $os_name == "Linux" ]]; then
+        if command -v ufw >/dev/null 2>&1 && command -v iptables >/dev/null 2>&1; then
+            firewall="ufw"
+        elif command -v iptables >/dev/null 2>&1 && command -v firewalld >/dev/null 2>&1; then
+            firewall="iptables-firewalld"
         fi
-
-        if ! iptables -L | grep -q " $listen_port"; then
-            iptables -A INPUT -p tcp --dport "$listen_port" -j ACCEPT
-        fi
-
-        echo -e "${GREEN}防火墙配置已更新。${NC}"
-    elif command -v ufw >/dev/null 2>&1; then
-        echo "检查防火墙配置..."
-        if ! ufw status | grep -q "Status: active"; then
-            ufw enable
-        fi
-
-        if ! ufw status | grep -q " $listen_port"; then
-            ufw allow "$listen_port"
-        fi
-
-        echo -e "${GREEN}防火墙配置已更新。${NC}"
-    elif command -v iptables >/dev/null 2>&1; then
-        echo "检查防火墙配置..."
-        if ! iptables -L | grep -q "Chain INPUT (policy ACCEPT)"; then
-            iptables -P INPUT ACCEPT
-        fi
-
-        if ! iptables -L | grep -q " $listen_port"; then
-            iptables -A INPUT -p tcp --dport "$listen_port" -j ACCEPT
-        fi
-
-        echo -e "${GREEN}防火墙配置已更新。${NC}"
-    elif command -v firewalld >/dev/null 2>&1; then
-        echo "检查防火墙配置..."
-        if ! firewall-cmd --state | grep -q "running"; then
-            systemctl start firewalld
-            systemctl enable firewalld
-        fi
-
-        if ! firewall-cmd --list-ports | grep -q "$listen_port/tcp"; then
-            firewall-cmd --add-port="$listen_port/tcp" --permanent
-            firewall-cmd --reload
-        fi
-
-        echo -e "${GREEN}防火墙配置已更新。${NC}"
-    else
-        echo -e "${RED}无法检测到适用的防火墙配置工具，请手动配置防火墙。${NC}"
     fi
+
+    if [[ -z $firewall ]]; then
+        echo -e "${RED}无法检测到适用的防火墙配置工具，请手动配置防火墙。${NC}"
+        return
+    fi
+
+    echo "检查防火墙配置..."
+
+    case $firewall in
+        ufw)
+            if ! ufw status | grep -q "Status: active"; then
+                ufw enable
+            fi
+
+            if ! ufw status | grep -q " $listen_port"; then
+                ufw allow "$listen_port"
+            fi
+
+            echo "防火墙配置已更新。"
+            ;;
+        iptables-firewalld)
+            if command -v iptables >/dev/null 2>&1; then
+                if ! iptables -C INPUT -p tcp --dport "$listen_port" -j ACCEPT >/dev/null 2>&1; then
+                    iptables -A INPUT -p tcp --dport "$listen_port" -j ACCEPT
+                fi
+
+                iptables-save > /etc/sysconfig/iptables
+
+                echo "iptables防火墙配置已更新。"
+            fi
+
+            if command -v firewalld >/dev/null 2>&1; then
+                if ! firewall-cmd --state | grep -q "running"; then
+                    systemctl start firewalld
+                    systemctl enable firewalld
+                fi
+
+                if ! firewall-cmd --zone=public --list-ports | grep -q "$listen_port/tcp"; then
+                    firewall-cmd --zone=public --add-port="$listen_port/tcp" --permanent
+                fi
+
+                if ! firewall-cmd --zone=public --list-ports | grep -q "$listen_port/udp"; then
+                    firewall-cmd --zone=public --add-port="$listen_port/udp" --permanent
+                fi
+
+                firewall-cmd --reload
+
+                echo "firewalld防火墙配置已更新。"
+            fi
+            ;;
+    esac
 }
 
 # 配置 sing-box 开机自启服务
