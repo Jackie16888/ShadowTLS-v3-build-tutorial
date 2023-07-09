@@ -152,7 +152,22 @@ download_precompiled_sing_box() {
 
 # 检查防火墙配置
 check_firewall_configuration() {
-    if command -v ufw >/dev/null 2>&1; then
+    if command -v ufw >/dev/null 2>&1 && command -v iptables >/dev/null 2>&1; then
+        echo "检查防火墙配置..."
+        if ! ufw status | grep -q "Status: active"; then
+            ufw enable
+        fi
+
+        if ! ufw status | grep -q " $listen_port"; then
+            ufw allow "$listen_port"
+        fi
+
+        if ! iptables -L | grep -q " $listen_port"; then
+            iptables -A INPUT -p tcp --dport "$listen_port" -j ACCEPT
+        fi
+
+        echo -e "${GREEN}防火墙配置已更新。${NC}"
+    elif command -v ufw >/dev/null 2>&1; then
         echo "检查防火墙配置..."
         if ! ufw status | grep -q "Status: active"; then
             ufw enable
@@ -338,6 +353,7 @@ set_handshake_server() {
     if [[ $is_supported == "false" ]]; then
         echo -e "${YELLOW}警告：无法验证握手服务器支持的TLS版本。请确保握手服务器支持TLS 1.3。${NC}"
     fi
+    handshake_server_global=$handshake_server
 }
 
 # 配置 sing-box 配置文件
@@ -382,7 +398,7 @@ configure_sing_box_config_file() {
         $users
       ],
       \"handshake\": {
-        \"server\": \"$handshake_server\",
+        \"server\": \"$handshake_server_global\",
         \"server_port\": 443
       },
       \"strict_mode\": true,
