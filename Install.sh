@@ -15,9 +15,9 @@ function check_dependencies() {
         if ! command -v "$package" &> /dev/null; then
             echo "安装依赖: $package"
             if [[ -n $(command -v apt-get) ]]; then
-                sudo apt-get -y install "$package"
+                apt-get -y install "$package"
             elif [[ -n $(command -v yum) ]]; then
-                sudo yum -y install "$package"
+                yum -y install "$package"
             else
                 echo "无法安装依赖，请手动安装: $package"
                 exit 1
@@ -30,9 +30,9 @@ function check_dependencies() {
 function enable_bbr() {
     if ! grep -q "net.core.default_qdisc=fq" /etc/sysctl.conf; then
         echo "开启 BBR..."
-        echo "net.core.default_qdisc=fq" | sudo tee -a /etc/sysctl.conf
-        echo "net.ipv4.tcp_congestion_control=bbr" | sudo tee -a /etc/sysctl.conf
-        sudo sysctl -p
+        echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+        echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+        sysctl -p
         echo -e "${GREEN}BBR 已开启${NC}"
     else
         echo -e "${YELLOW}BBR 已经开启，跳过配置。${NC}"
@@ -43,8 +43,7 @@ function enable_bbr() {
 function check_and_create_folder() {
     local folder=$1
     if [ ! -d "$folder" ]; then
-        sudo mkdir -p "$folder"
-        sudo chown -R $USER:$USER "$folder"
+        mkdir -p "$folder"
         echo -e "${GREEN}创建 $folder 成功。${NC}"
     else
         echo -e "${YELLOW}$folder 已存在，跳过创建。${NC}"
@@ -55,14 +54,12 @@ function check_and_create_folder() {
 function check_and_create_file() {
     local file=$1
     if [ ! -f "$file" ]; then
-        sudo touch "$file"
-        sudo chown $USER:$USER "$file"
+        touch "$file"
         echo -e "${GREEN}创建 $file 成功。${NC}"
     else
         echo -e "${YELLOW}$file 已存在，跳过创建。${NC}"
     fi
 }
-
 
 # 选择安装方式
 function select_sing_box_install_option() {
@@ -75,15 +72,15 @@ function select_sing_box_install_option() {
 
     case $install_option in
         1)
-            sudo install_go
-            sudo compile_install_sing_box
+            install_go
+            compile_install_sing_box
             ;;
         2)
-            sudo download_precompiled_sing_box
+            download_precompiled_sing_box
             ;;
         *)
             echo -e "${RED}无效的选择，请重新输入。${NC}"
-            select_sing_box_install_option
+            install_sing_box
             ;;
     esac
 }
@@ -91,7 +88,7 @@ function select_sing_box_install_option() {
 # 安装 Go
 function install_go() {
     if ! command -v go &> /dev/null; then
-        echo "下载并安装 Go..."
+         echo "下载并安装 Go..."
         local go_arch
         if [[ $(arch) == "x86_64" ]]; then
             go_arch="amd64"
@@ -102,11 +99,8 @@ function install_go() {
             exit 1
         fi
 
-        # Download and extract Go
-        wget -c "https://go.dev/dl/go1.20.5.linux-$go_arch.tar.gz" -O - | sudo tar -xz -C /usr/local
-
-        # Add Go binary path to the PATH environment variable
-        echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
+        wget -c "https://go.dev/dl/go1.20.5.linux-$go_arch.tar.gz" -O - | tar -xz -C /usr/local
+        echo 'export PATH=$PATH:/usr/local/go/bin' > /etc/profile
         source /etc/profile
 
         echo -e "${GREEN}Go 已安装${NC}"
@@ -126,14 +120,12 @@ function compile_install_sing_box() {
     # 选择合适的模块版本
     sing_box_version=$(go list -m -versions github.com/sagernet/sing-box/cmd/sing-box | tail -1)
 
-    # Use `sudo` only for copying the compiled binary to /usr/local/bin/
     go install -v -tags "with_dhcp@${sing_box_version},with_dhcp,with_wireguard@${sing_box_version},with_ech@${sing_box_version},with_utls@${sing_box_version},with_clash_api@${sing_box_version},with_v2ray_api@${sing_box_version},with_gvisor@${sing_box_version},with_lwip@${sing_box_version}" \
         github.com/sagernet/sing-box/cmd/sing-box@latest
 
     if [[ $? -eq 0 ]]; then
-        # Use `sudo` only for copying the binary to /usr/local/bin/ and setting permissions
-        sudo cp ~/go/bin/sing-box /usr/local/bin/
-        sudo chmod +x /usr/local/bin/sing-box
+        cp ~/go/bin/sing-box /usr/local/bin/
+        chmod +x /usr/local/bin/sing-box
         echo -e "${GREEN}sing-box 编译安装成功${NC}"
     else
         echo -e "${RED}sing-box 编译安装失败${NC}"
@@ -141,21 +133,20 @@ function compile_install_sing_box() {
     fi
 }
 
-
 # 下载预编译版 sing-box
 function download_precompiled_sing_box() {
     if [[ $(arch) == "x86_64" ]]; then
-        echo "下载预编译的 sing-box (AMD 内核)..."
-        wget -c "https://github.com/SagerNet/sing-box/releases/download/v1.3.0/sing-box-1.3.0-linux-amd64.tar.gz" -O - | sudo tar -xz -C /usr/local/bin --strip-components=1
+        echo "下载并安装预编译的 sing-box (AMD 内核)..."
+        wget -c "https://github.com/SagerNet/sing-box/releases/download/v1.3.0/sing-box-1.3.0-linux-amd64.tar.gz" -O - | tar -xz -C /usr/local/bin --strip-components=1
     elif [[ $(arch) == "aarch64" ]]; then
-        echo "下载预编译的 sing-box (ARM 内核)..."
-        wget -c "https://github.com/SagerNet/sing-box/releases/download/v1.3.0/sing-box-1.3.0-linux-arm64.tar.gz" -O - | sudo tar -xz -C /usr/local/bin --strip-components=1
+        echo "下载并安装预编译的 sing-box (ARM 内核)..."
+        wget -c "https://github.com/SagerNet/sing-box/releases/download/v1.3.0/sing-box-1.3.0-linux-arm64.tar.gz" -O - | tar -xz -C /usr/local/bin --strip-components=1
     else
         echo -e "${RED}不支持的架构: $(arch)${NC}"
         exit 1
     fi
 
-    sudo chmod +x /usr/local/bin/sing-box
+    chmod +x /usr/local/bin/sing-box
     echo -e "${GREEN}sing-box 安装成功${NC}"
 }
 
@@ -182,41 +173,41 @@ function check_firewall_configuration() {
     case $firewall in
         ufw)
             if ! ufw status | grep -q "Status: active"; then
-                sudo ufw enable
+                ufw enable
             fi
 
             if ! ufw status | grep -q " $listen_port"; then
-                sudo ufw allow "$listen_port"
+                ufw allow "$listen_port"
             fi
 
             echo "防火墙配置已更新。"
             ;;
         iptables-firewalld)
             if command -v iptables >/dev/null 2>&1; then
-                if ! sudo iptables -C INPUT -p tcp --dport "$listen_port" -j ACCEPT >/dev/null 2>&1; then
-                    sudo iptables -A INPUT -p tcp --dport "$listen_port" -j ACCEPT
+                if ! iptables -C INPUT -p tcp --dport "$listen_port" -j ACCEPT >/dev/null 2>&1; then
+                    iptables -A INPUT -p tcp --dport "$listen_port" -j ACCEPT
                 fi
 
-                sudo iptables-save > /etc/sysconfig/iptables
+                iptables-save > /etc/sysconfig/iptables
 
                 echo "iptables防火墙配置已更新。"
             fi
 
             if command -v firewalld >/dev/null 2>&1; then
-                if ! sudo firewall-cmd --state | grep -q "running"; then
-                    sudo systemctl start firewalld
-                    sudo systemctl enable firewalld
+                if ! firewall-cmd --state | grep -q "running"; then
+                    systemctl start firewalld
+                    systemctl enable firewalld
                 fi
 
-                if ! sudo firewall-cmd --zone=public --list-ports | grep -q "$listen_port/tcp"; then
-                    sudo firewall-cmd --zone=public --add-port="$listen_port/tcp" --permanent
+                if ! firewall-cmd --zone=public --list-ports | grep -q "$listen_port/tcp"; then
+                    firewall-cmd --zone=public --add-port="$listen_port/tcp" --permanent
                 fi
 
-                if ! sudo firewall-cmd --zone=public --list-ports | grep -q "$listen_port/udp"; then
-                    sudo firewall-cmd --zone=public --add-port="$listen_port/udp" --permanent
+                if ! firewall-cmd --zone=public --list-ports | grep -q "$listen_port/udp"; then
+                    firewall-cmd --zone=public --add-port="$listen_port/udp" --permanent
                 fi
 
-                sudo firewall-cmd --reload
+                firewall-cmd --reload
 
                 echo "firewalld防火墙配置已更新。"
             fi
@@ -241,7 +232,7 @@ RestartSec=1800s
 LimitNOFILE=infinity
 
 [Install]
-WantedBy=multi-user.target" | sudo tee /etc/systemd/system/sing-box.service
+WantedBy=multi-user.target" | tee /etc/systemd/system/sing-box.service
 }
 
 # 设置监听端口
@@ -488,9 +479,9 @@ function configure_sing_box() {
 # 启动 sing-box 服务
 function start_sing_box_service() {
     echo "启动 sing-box 服务..."
-    sudo systemctl daemon-reload
-    sudo systemctl enable sing-box
-    sudo systemctl start sing-box
+    systemctl daemon-reload
+    systemctl enable sing-box
+    systemctl start sing-box
 
     if [[ $? -eq 0 ]]; then
         echo -e "${GREEN}sing-box 服务已启动。${NC}"
@@ -549,7 +540,7 @@ echo -e "${GREEN}               ------------------------------------------------
 # 停止 sing-box 服务
 function stop_sing_box_service() {
     echo "停止 sing-box 服务..."
-    sudo systemctl stop sing-box
+    systemctl stop sing-box
 
     if [[ $? -eq 0 ]]; then
         echo -e "${GREEN}sing-box 服务已停止。${NC}"
@@ -561,7 +552,7 @@ function stop_sing_box_service() {
 # 重启 sing-box 服务
 function restart_sing_box_service() {
     echo "重启 sing-box 服务..."
-    sudo systemctl restart sing-box
+    systemctl restart sing-box
 
     if [[ $? -eq 0 ]]; then
         echo -e "${GREEN}sing-box 服务已重启。${NC}"
@@ -584,9 +575,9 @@ function uninstall_sing_box() {
 
     # 删除文件和文件夹
     echo "删除文件和文件夹..."
-    sudo rm -rf /usr/local/bin/sing-box
-    sudo rm -rf /usr/local/etc/sing-box
-    sudo rm -rf /etc/systemd/system/sing-box.service
+    rm -rf /usr/local/bin/sing-box
+    rm -rf /usr/local/etc/sing-box
+    rm -rf /etc/systemd/system/sing-box.service
 
     echo -e "${GREEN}sing-box 卸载完成。${NC}"
 }
