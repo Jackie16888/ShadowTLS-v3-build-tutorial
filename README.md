@@ -1,26 +1,5 @@
-# **Illustrate**
-### The script has two options of self-compilation and downloading the pre-compiled version of sing-box.
-### Script supports custom port, supports multi-user.
-### The script supports CentOS 8+, Debian 10+, Ubuntu 20+ operating systems.
-### Openssl version ≥ 1.1.1 is required to run this script.
-### All codes are from official documentation;The script is completely open source,you can use it with confidence!
-### Sing-box executable file directory: /usr/local/bin/sing-box.
-### The systemd service directory of sing-box: /etc/systemd/system/sing-box.service.
-### Sing-box configuration file directory: /usr/local/etc/sing-box/config.json.
 
-# **Script installation**
-```
-#Debian&&Ubuntu
-apt update && apt -y install curl
-```
-```
-#CentOS
-yum update && yum -y install curl
-```
-```
-bash <(curl -L https://raw.githubusercontent.com/TinrLin/ShadowTLS-v3-build-tutorial/main/Install.sh)
-```
-# **Manual installation**
+# **installation**
 
 - ## **Download the precompiled version of sing-box**
 - AMD core
